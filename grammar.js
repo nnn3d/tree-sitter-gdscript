@@ -1,4 +1,7 @@
 const PREC = {
+  // `as` is the loosest operator, below the ternary: `a if b else c as int` is
+  // `(a if b else c) as int`.
+  as: -2,
   typed_parameter: -1,
   conditional: -1,
 
@@ -19,7 +22,9 @@ const PREC = {
   power: 13,
   unary: 14,
   is: 15,
-  as: 16,
+  // The type after `as` ends before any binary operator but takes `.` and
+  // `[]`: `x as int + 1` is `(x as int) + 1`, `x as Array[int]` is one type.
+  as_type: 16,
   call: 17,
   attribute: 18,
   attribute_expression: 19,
@@ -642,7 +647,6 @@ module.exports = grammar({
         ["!=", PREC.compare],
         [">=", PREC.compare],
         [">", PREC.compare],
-        ["as", PREC.as],
         [seq("is", "not"), PREC.is],
         ["is", PREC.is],
       ];
@@ -658,7 +662,19 @@ module.exports = grammar({
         );
       });
 
-      return choice(...choices);
+      return choice(
+        ...choices,
+        // Like in Godot, the right of `as` is a type, which any binary operator
+        // ends (see `PREC.as_type`), so `as` can bind looser than all of them.
+        prec.left(
+          PREC.as,
+          seq(
+            field("left", $._expression),
+            field("op", "as"),
+            field("right", prec(PREC.as_type, $._primary_expression)),
+          ),
+        ),
+      );
     },
 
     unary_operator: ($) =>

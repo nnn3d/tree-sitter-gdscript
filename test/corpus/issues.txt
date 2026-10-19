@@ -622,3 +622,95 @@ func foo():
           left: (unary_operator
             (false))
           right: (true))))))
+
+==================================================
+Ensure that as has lower precedence than all operators
+==================================================
+
+func foo():
+	a + b as int
+	a or b as int
+	not a as int
+	a if b else c as int
+	await a as int
+
+---
+
+(source
+  (function_definition
+    name: (name)
+    parameters: (parameters)
+    body: (body
+      (expression_statement
+        (binary_operator
+          left: (binary_operator
+            left: (identifier)
+            right: (identifier))
+          right: (identifier)))
+      (expression_statement
+        (binary_operator
+          left: (binary_operator
+            left: (identifier)
+            right: (identifier))
+          right: (identifier)))
+      (expression_statement
+        (binary_operator
+          left: (unary_operator
+            (identifier))
+          right: (identifier)))
+      (expression_statement
+        (binary_operator
+          left: (conditional_expression
+            left: (identifier)
+            condition: (identifier)
+            right: (identifier))
+          right: (identifier)))
+      (expression_statement
+        (binary_operator
+          left: (await_expression
+            (identifier))
+          right: (identifier))))))
+
+======================================
+Ensure that as takes a type on the right
+======================================
+
+func foo():
+	a as int + 1
+	a as int if b else c
+	a as Array[int]
+	a as A.B
+
+---
+
+(source
+  (function_definition
+    name: (name)
+    parameters: (parameters)
+    body: (body
+      (expression_statement
+        (binary_operator
+          left: (binary_operator
+            left: (identifier)
+            right: (identifier))
+          right: (integer)))
+      (expression_statement
+        (conditional_expression
+          left: (binary_operator
+            left: (identifier)
+            right: (identifier))
+          condition: (identifier)
+          right: (identifier)))
+      (expression_statement
+        (binary_operator
+          left: (identifier)
+          right: (subscript
+            (identifier)
+            arguments: (subscript_arguments
+              (identifier)))))
+      (expression_statement
+        (binary_operator
+          left: (identifier)
+          right: (attribute
+            (identifier)
+            (identifier)))))))
