@@ -714,3 +714,56 @@ func foo():
           right: (attribute
             (identifier)
             (identifier)))))))
+
+==========================================================
+Ensure that ** has higher precedence than unary and * / %
+==========================================================
+
+func foo():
+	-a ** 2
+	~a ** 2
+	a * b ** 2
+	a ** b * 2
+	a ** -b
+	a ** b ** 2
+
+---
+
+(source
+  (function_definition
+    name: (name)
+    parameters: (parameters)
+    body: (body
+      (expression_statement
+        (unary_operator
+          (binary_operator
+            left: (identifier)
+            right: (integer))))
+      (expression_statement
+        (unary_operator
+          (binary_operator
+            left: (identifier)
+            right: (integer))))
+      (expression_statement
+        (binary_operator
+          left: (identifier)
+          right: (binary_operator
+            left: (identifier)
+            right: (integer))))
+      (expression_statement
+        (binary_operator
+          left: (binary_operator
+            left: (identifier)
+            right: (identifier))
+          right: (integer)))
+      (expression_statement
+        (binary_operator
+          left: (identifier)
+          right: (unary_operator
+            (identifier))))
+      (expression_statement
+        (binary_operator
+          left: (binary_operator
+            left: (identifier)
+            right: (identifier))
+          right: (integer))))))

@@ -19,8 +19,9 @@ const PREC = {
   shift: 10,
   plus: 11,
   times: 12,
-  power: 13,
-  unary: 14,
+  unary: 13,
+  // `**` binds tighter than unary operators: `-a ** 2` is `-(a ** 2)`.
+  power: 14,
   is: 15,
   // The type after `as` ends before any binary operator but takes `.` and
   // `[]`: `x as int + 1` is `(x as int) + 1`, `x as Array[int]` is one type.
@@ -634,7 +635,7 @@ module.exports = grammar({
         ["-", PREC.plus],
         ["*", PREC.times],
         ["/", PREC.times],
-        ["**", PREC.times],
+        ["**", PREC.power],
         ["%", PREC.times],
         ["|", PREC.bitwise_or],
         ["&", PREC.bitwise_and],
